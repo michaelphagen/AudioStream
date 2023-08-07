@@ -59,7 +59,7 @@ def getAudioSettings():
             info=audio.get_device_info_by_index(i)
             device['supportedSampleRates']=checkSampleRates(i)
             device['name']=info['name']
-            device['index']=i
+            device['index']=info['index']
             device['channels']=info['maxInputChannels']
             # If device isn't already in the list, add it
             if device not in devicesList:
@@ -96,7 +96,7 @@ def main():
     # Create a list of devices to display in the GUI (id: name)
     devicesDisplay = []
     for i in range(len(devicesList)):
-        devicesDisplay.append(str(i) + ': ' + devicesList[i]['name'])
+        devicesDisplay.append(str(devicesList[i]['index']) + ': ' + devicesList[i]['name'])
     # Draw the GUI
     layout = [[sg.Text('Audio Settings')],
                 [sg.Text('Device', size=(15, 1)), sg.Combo(devicesDisplay, size=(30, 1), key="device",enable_events=True)],
