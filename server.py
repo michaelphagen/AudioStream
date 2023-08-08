@@ -73,7 +73,7 @@ def create_app(DEVICEINDEX, CHANNELS, RATE, BITDEPTH, CHUNK):
                     <br/>
                     AudioStream is developed and maintained by Michael Hagen
                     <br />
-                    See the <a href="https://github.com/michaelphagen/AudioStream">GitHub</a> page for more information
+                    See the <a href="https://github.com/michaelphagen/AudioStream" target="_blank">GitHub</a> page for more information
                 </body>
                 </html>"""
         return html
