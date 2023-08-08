@@ -46,7 +46,7 @@ def create_app(DEVICEINDEX, CHANNELS, RATE, BITDEPTH, CHUNK):
             while True:
                 if first_buffer:
                     first_buffer = False
-                    buffer = wav_header + stream.read(CHUNK)
+                    buffer = wav_header + stream.read(CHUNK,exception_on_overflow = False)
                 else:
                     buffer = stream.read(CHUNK)
 
