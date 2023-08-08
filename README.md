@@ -37,4 +37,5 @@ AudioStream uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to create 
 ## Donate
 
 If you find this project useful and you would like to donate toward on-going development you can use the link below. Any and all donations are much appreciated!
+
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/michaelphagen)
