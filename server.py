@@ -36,20 +36,12 @@ def create_app(DEVICEINDEX, CHANNELS, RATE, BITDEPTH, CHUNK):
     def audio():
         # start Recording
         def sound():
-            wav_header = genHeader(RATE, BITDEPTH, CHANNELS)
-
-            stream = audio1.open(format=FORMAT, channels=CHANNELS,
-                            rate=RATE, input=True,input_device_index=DEVICEINDEX,
-                            frames_per_buffer=CHUNK)
-            #frames = []
-            first_buffer = True
+            header = genHeader(sampleRate, bitDepth, channels)
+            stream = audioInput.open(format=FORMAT, channels=channels,rate=sampleRate, input=True, input_device_index=deviceIndex,frames_per_buffer=chunkSize)
+            yield(header)
+            # INFO: Continuously read the audio stream and yield the data
             while True:
-                if first_buffer:
-                    first_buffer = False
-                    buffer = wav_header + stream.read(CHUNK,exception_on_overflow = False)
-                else:
-                    buffer = stream.read(CHUNK,exception_on_overflow = False)
-
+                buffer = stream.read(chunkSize,exception_on_overflow = False)
                 yield(buffer)
         return Response(sound())
 
