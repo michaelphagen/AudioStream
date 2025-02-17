@@ -2,7 +2,7 @@
 # This script is used to install the requirements for the project on a mac
 
 #cd into the directory of the script
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Install homebrew if not already installed
 if ! hash brew 2>/dev/null; then
@@ -10,27 +10,40 @@ if ! hash brew 2>/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# find python or python3 executable
-if hash python3 2>/dev/null; then
-    PIP_EXECUTABLE=pip3
-elif hash python 2>/dev/null; then
-    # Confirm that python version is 3 or greater
-    PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
-    if [[ $PYTHON_VERSION == 2* ]]; then
-        echo "Python version 3 or greater required"
-        brew install python3
-        PIP_EXECUTABLE=pip3
-    fi
-    PIP_EXECUTABLE=pip
-else
-    echo "Python not found"
-    exit 1
+# If portaudio and python-tk@3.11 are not installed, install them
+if ! brew list | grep -q portaudio || ! brew list | grep -q python-tk@3.11; then
+    echo "Installing system dependencies"
+    echo "Installing portaudio and python-tk@3.11"
+    brew install portaudio python-tk@3.11
 fi
 
-# Install system dependencies
-echo "Installing system dependencies"
-brew install portaudio python-tk
+# Get the python 3.11 executable and pip executable installed via homebrew
+PYTHON_EXECUTABLE=$(brew --prefix python@3.11)/bin/python3.11
+PIP_EXECUTABLE=$(brew --prefix python@3.11)/bin/pip3.11
 
-# Install python dependencies
-echo "Installing python dependencies"
-$PIP_EXECUTABLE install -r requirements.txt
+# If python dependencies are not installed (requirements.txt), install them
+# Check for a pyvenv.cfg file to determine if the environment is managed externally
+if [ -f pyvenv.cfg ]; then
+    source ./bin/activate
+    if ! python -m pip freeze | grep -q -f requirements.txt; then
+        echo "Installing python dependencies"
+        $PIP_EXECUTABLE install -r requirements.txt
+    fi
+else
+    if ! python -m pip freeze | grep -q -f requirements.txt; then
+        echo "Installing python dependencies"
+        $PIP_EXECUTABLE install -r requirements.txt || {
+            if [[ $? -eq 1 && $($PIP_EXECUTABLE install -r requirements.txt 2>&1) == *"externally-managed-environment"* ]]; then
+                echo "Handling externally managed environment error"
+                $PYTHON_EXECUTABLE -m venv ./
+                source ./bin/activate
+                $PIP_EXECUTABLE install -r requirements.txt
+            else
+                exit 1
+            fi
+        }
+    fi
+fi
+
+# Run the app
+$PYTHON_EXECUTABLE app.py

@@ -19,11 +19,10 @@ AudioStream uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to create 
 ### MacOS & Linux
 
 1. Clone the repository with `git clone https://github.com/michaelphagen/AudioStream.git` or [download the zip](https://github.com/michaelphagen/AudioStream/archive/refs/heads/main.zip)
-2. Install dependencies by double clicking the `mac_setup.command` file
-3. Run the application with `python app.py`
-4. Select the audio device and parameters you want to use
-5. Click "Confirm"
-6. Go to the URL displayed on screen to listen to the audio
+2. Install dependencies and run the application by double clicking the `mac_run.command` file
+3. Select the audio device and parameters you want to use
+4. Click "Confirm"
+5. Go to the URL displayed on screen to listen to the audio
 
 ## Dependencies
 
