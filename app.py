@@ -9,11 +9,13 @@ import qrcode
 import os
 import webbrowser
 
+# INFO: Get the IP address of the server by attempting a connecton
+# RTRN: IP - the IP address of the server
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(0)
     try:
-        # doesn't even have to be reachable
+        # doesn't have to be reachable, just attempt connection
         s.connect(('10.254.254.254', 1))
         IP = s.getsockname()[0]
     except Exception:
@@ -22,8 +24,10 @@ def get_ip():
         s.close()
     return IP
 
+# INFO: Generate a QR code for the server URL
+# ARGS: link - the URL to generate the QR code for
+# RTRN: path - the path to the generated QR code
 def generate_qr_code(link):
-    #Creating an instance of qrcode
     qr = qrcode.QRCode(
             version=1,
             box_size=10,
@@ -36,6 +40,9 @@ def generate_qr_code(link):
     img.save(path)
     return path
 
+# INFO: Check the sample rates supported by the selected device
+# ARGS: deviceIndex - the index of the selected device from PyAudio's get_device_info_by_index
+# RTRN: supportedRates - a list of supported (common) sample rates in hz
 def checkSampleRates(deviceIndex):
     normalRates=[44100, 48000, 88200, 96000, 176400, 19200]
     supportedRates=[]
@@ -48,7 +55,12 @@ def checkSampleRates(deviceIndex):
             pass
     return supportedRates
             
-
+# INFO: Get the audio settings of the ADC devices
+# RTRN: devicesList - a list of dictionaries containing:
+#                       - name: the name of the device
+#                       - index: the index of the device
+#                       - channels: the number of channels the device supports
+#                       - supportedSampleRates: a list of supported (common) sample rates in hz
 def getAudioSettings():
     devicesList=[]
     audio = pyaudio.PyAudio()
@@ -61,15 +73,29 @@ def getAudioSettings():
             device['name']=info['name']
             device['index']=info['index']
             device['channels']=info['maxInputChannels']
-            # If device isn't already in the list, add it
             if device not in devicesList:
                 devicesList.append(device)
     return devicesList
 
+# INFO: Run the server with the selected audio parameters
+# ARGS: deviceIndex - the index of the selected device from PyAudio's get_device_info_by_index
+#       channels - the number of channels to use
+#       sampleRate - the sample rate to use in hz
+#       bitDepth - the bit depth to use
+#       chunkSize - the chunk size to use
+#       port - the port to run the server on
+# RTRN: None
 def runServer(deviceIndex, channels, sampleRate, bitDepth, chunkSize, port):
     app = create_app(deviceIndex, channels, sampleRate, bitDepth, chunkSize)
     app.run(host='0.0.0.0', debug=False, threaded=True,port=port)
 
+# INFO: Create the GUI to be displayed while the server is running
+# ARGS: deviceIndex - the index of the selected device from PyAudio's get_device_info_by_index
+#       channels - the number of channels to use
+#       sampleRate - the sample rate to use in hz
+#       bitDepth - the bit depth to use
+#       chunkSize - the chunk size to use
+# RTRN: None
 def serverRunningUI(deviceIndex, channels, sampleRate, bitDepth, chunkSize):
     port=5000
     ip=get_ip()
@@ -80,7 +106,7 @@ def serverRunningUI(deviceIndex, channels, sampleRate, bitDepth, chunkSize):
     server = Thread(target=runServer, args=(deviceIndex, channels, sampleRate, bitDepth, chunkSize, port))
     server.setDaemon(True)
     server.start()
-    
+    # Wait for the user to stop the server
     while True:
         event, values = window.read()
         if event == 'link':
@@ -89,6 +115,7 @@ def serverRunningUI(deviceIndex, channels, sampleRate, bitDepth, chunkSize):
             break
     window.close()
 
+# INFO: Main function to get the audio settings and display the GUI
 def main():
     # Get the list of devices
     devicesList = getAudioSettings()
@@ -108,9 +135,11 @@ def main():
     window = sg.Window('Audio Settings', layout)
     while True:
         event, values = window.read()
+        # Start the server with the selected audio parameters
         if event == 'Submit':
             window.close()
             serverRunningUI(int(values['device'].split(':')[0]), int(values['channels']), int(values['sampleRate']), int(values['bitDepth']), int(values['chunkSize']))
+        # Update the sample rate, bit depth, and channels lists when a new device is selected
         if event == 'device':
             newDeviceIndex = int(values['device'].split(':')[0])
             newDeviceSampleRates = devicesList[newDeviceIndex]['supportedSampleRates']
@@ -136,13 +165,14 @@ def main():
                 window['channels'].update(value=previousChannels)
             else:
                 window['channels'].update(value=1)
+        # Close the window if the user cancels or closes the window
         if event == 'Cancel' or event == sg.WIN_CLOSED:
-            # if QR code file exists, delete it
+            # if QR code exists, delete it
             if os.path.exists("qr_code.png"):
                 os.remove("qr_code.png")
             window.close()
             return None
 
-
+# Run the main function if this file is run
 if __name__ == '__main__':
     main()

@@ -1,37 +1,50 @@
-from flask import Flask, Response,render_template
+import numpy as np
+from flask import Flask, Response
 import pyaudio
 
-def create_app(DEVICEINDEX, CHANNELS, RATE, BITDEPTH, CHUNK):
-
-    print("Starting Stream for Device: " + str(DEVICEINDEX) + " with Sample Rate: " + str(RATE) + " and Bit Depth: " + str(BITDEPTH) + " and Chunk Size: " + str(CHUNK) + " and Channels: " + str(CHANNELS))
+# INFO: Create the Flask app
+# ARGS: deviceIndex - the index of the selected device from PyAudio's get_device_info_by_index
+#       channels - the number of channels to use
+#       sampleRate - the sample sampleRate to use in hz
+#       bitDepth - the bit depth to use
+#       chunkSize - the chunk size to use
+# RTRN: app - starts the Flask app
+def create_app(deviceIndex, channels, sampleRate, bitDepth, chunkSize):
     app = Flask(__name__)
-    audio1 = pyaudio.PyAudio()
+    audioInput = pyaudio.PyAudio()
 
     # Get format from bit depth
-    if BITDEPTH == 16:
+    if bitDepth == 16:
         FORMAT = pyaudio.paInt16
-    elif BITDEPTH == 24:
+    elif bitDepth == 24:
         FORMAT = pyaudio.paInt24
-    elif BITDEPTH == 32:
-        FORMAT = pyaudio.paInt32
+    elif bitDepth == 32:
+        FORMAT = pyaudio.paFloat32
 
-    def genHeader(sampleRate, bitsPerSample, channels):
+    # INFO: Generate the header for the wav file
+    # ARGS: sampleRate - the sample sampleRate to use in hz
+    #       bitDepth - the bit depth to use
+    #       channels - the number of channels to use
+    # RTRN: header - the header for the wav file
+    def genHeader(sampleRate, bitDepth, channels):
         datasize = 2000*10**6
-        o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
-        o += (datasize + 36).to_bytes(4,'little')                               # (4byte) File size in bytes excluding this and RIFF marker
-        o += bytes("WAVE",'ascii')                                              # (4byte) File type
-        o += bytes("fmt ",'ascii')                                              # (4byte) Format Chunk Marker
-        o += (16).to_bytes(4,'little')                                          # (4byte) Length of above format data
-        o += (1).to_bytes(2,'little')                                           # (2byte) Format type (1 - PCM)
-        o += (channels).to_bytes(2,'little')                                    # (2byte)
-        o += (sampleRate).to_bytes(4,'little')                                  # (4byte)
-        o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4,'little')  # (4byte)
-        o += (channels * bitsPerSample // 8).to_bytes(2,'little')               # (2byte)
-        o += (bitsPerSample).to_bytes(2,'little')                               # (2byte)
-        o += bytes("data",'ascii')                                              # (4byte) Data Chunk Marker
-        o += (datasize).to_bytes(4,'little')                                    # (4byte) Data size in bytes
-        return o
+        header = bytes("RIFF",'ascii')
+        header += (datasize + 36).to_bytes(4,'little')
+        header += bytes("WAVE",'ascii')
+        header += bytes("fmt ",'ascii')
+        header += (16).to_bytes(4,'little')
+        header += (1).to_bytes(2,'little')
+        header += (channels).to_bytes(2,'little')
+        header += (sampleRate).to_bytes(4,'little')
+        header += (sampleRate * channels * bitDepth // 8).to_bytes(4,'little')
+        header += (channels * bitDepth // 8).to_bytes(2,'little')
+        header += (bitDepth).to_bytes(2,'little')
+        header += bytes("data",'ascii')
+        header += (datasize).to_bytes(4,'little')
+        return header
 
+    # INFO: Create the audio route
+    # RTRN: Response - the audio data from the buffer
     @app.route('/audio')
     def audio():
         # start Recording
@@ -45,6 +58,8 @@ def create_app(DEVICEINDEX, CHANNELS, RATE, BITDEPTH, CHUNK):
                 yield(buffer)
         return Response(sound())
 
+    # INFO: Create the client side webpage hosting the media player
+    # RTRN: html - the html for the index page
     @app.route('/')
     def index():
         html="""<!DOCTYPE html>
