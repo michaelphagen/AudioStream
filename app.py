@@ -120,6 +120,9 @@ def main():
     # Get the list of devices
     devicesList = getAudioSettings()
     bitDepths = [16, 24, 32]
+    # 24 bit not supported by Apple devices, so remove it if on Mac
+    if 'Darwin' in os.uname():
+        bitDepths.remove(24)
     # Create a list of devices to display in the GUI (id: name)
     devicesDisplay = []
     for i in range(len(devicesList)):
