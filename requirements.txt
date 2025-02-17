@@ -1,5 +1,5 @@
 Flask
 qrcode
 pyaudio
-PySimpleGUI
+FreeSimpleGUI
 qrcode

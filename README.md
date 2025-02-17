@@ -29,7 +29,7 @@ AudioStream uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to create 
 
 - [Flask](https://flask.palletsprojects.com/en/1.1.x/)
 - [PyAudio](https://pypi.org/project/PyAudio/)
-- [PySimpleGUI](https://pypi.org/project/PySimpleGUI/)
+- [FreeSimpleGUI](https://github.com/spyoungtech/FreeSimpleGui)
 - [qrcode](https://pypi.org/project/qrcode/)
 - [PortAudio](http://www.portaudio.com/)
 - [python-tk](https://wiki.python.org/moin/TkInter)

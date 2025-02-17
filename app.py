@@ -2,7 +2,7 @@
 
 from server import create_app
 import pyaudio
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 from threading import Thread
 import socket
 import qrcode
