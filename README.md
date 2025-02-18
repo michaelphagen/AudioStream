@@ -1,10 +1,10 @@
 # AudioStream
 
-Stream an Audio Device to a webpage with Python
+Stream an Audio Device to a webpage with Python.
 
 ## How it works
 
-AudioStream uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to create a web server that streams audio from the selected audio device. The PCM audio is captured using [PyAudio](https://pypi.org/project/PyAudio/) and embedded into a webpage as an audio element. The webpage is served using Flask and can be accessed by any device on the same network. The app also displays a QR code that can be scanned to quickly access the webpage on a mobile device.
+AudioStream uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to create a web server that streams audio from the selected audio device. The PCM audio is captured using [PyAudio](https://pypi.org/project/PyAudio/) and embedded into a webpage as an audio element. The webpage is served using Flask and can be accessed by any device on the same network. The app also displays a QR code that can be scanned to quickly access the webpage on a mobile device. The project was created to allow audio material to be presented in high quality to an audience using their personal devices.
 
 ## How to use
 
